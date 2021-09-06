@@ -1,6 +1,6 @@
 # JavaScript Tester README
 ## Description
-This is a tiny test framework for JS. What is special about it? Its low weight! It is barely 41 lines of code, and weighs 2KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
+This is a tiny test framework for JS. What is special about it? Its low weight! It is barely 57 lines of code, and weighs 2KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
 
 ## Usage
 ### Case
@@ -48,6 +48,17 @@ A test can fail for two reasons:
   > FAILED! Test: "My test name" due to "ReferenceError: something is not defined"
   
   ```
+
+### Configuration
+All configuration variables are in `Test.config` object. Set them before creating tests.
+
+#### Test.config.logSuccessful
+When true, each test logs a green success message to the console with their description if it is successful.
+True by default.
+
+#### Test.config.alertFailure
+When true, whenever at least one test fails, an alert appears. This feature is useful when you want to close the console and be informed when a test fails.
+True by default.
 
 ## Classes
 ### Test class

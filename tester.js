@@ -1,6 +1,7 @@
 /// TESTER ///
 
 class Test {
+	static config = {logSuccessful: true, alertFailure: true};
 	static executions = []; // Test execution promises.
 	
 	constructor(description, code) {
@@ -12,11 +13,22 @@ class Test {
 		Test.executions.push(this.execution); // It adds its execution (promise) to an array of Test Class of all executions.
 	}
 
-	execute(code) { return code.constructor.name == "AsyncFunction" ? code(this.assert) : (async () => code(this.assert))() } // It executes code asyncronously.
+	execute(code) { // It executes code asyncronously.
+		if (code.constructor.name == "AsyncFunction") {
+		  return code(this.assert);
+	  } else {
+	    return (async () => code(this.assert))();
+	  }
+	}
 
 	assert(assertion) {	if(!assertion) throw "Test assertion is false"; } // This function is passed to test code as an argument.
 
-	successMessage() { console.info(`%c Success! Test: ${this.description}`, 'color: green; background: #dfd;') }
+	successMessage() {
+	  if (Test.config.logSuccessful) {
+	  	console.info(`%c Success! Test: ${this.description}`, 'color: green; background: #dfd;');
+	  } 
+	}
+
 	failureMessage(error) { console.error(`FAILED! Test: "${this.description}" due to "${error}"`) }
 
 	static summary(results) { // It logs a summary of results
@@ -31,6 +43,10 @@ class Test {
 		const message = `%c ${passed} PASSED & ${failed} FAILED (tests summary)`;
 		console.info(message, style);
 		console.groupEnd();
+
+		if (failed && Test.config.alertFailure) {
+			alert("FAILED! Some tests have failed. Check console for more info.");
+		}
 	}
 
 	static case(tests) { // It creates given tests and logs a summary about their results.
