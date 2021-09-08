@@ -60,13 +60,24 @@ True by default.
 When true, whenever at least one test fails, an alert appears. This feature is useful when you want to close the console and be informed when a test fails.
 True by default.
 
+#### Test.config.errorGroupCollapsed
+When true, errors of each test appear in a collapsed group with test's description and error's name as title, otherwise, this same group is open.
+True by default.
+
 ## Classes
 ### Test class
 This is Tester class.
 
-#### Static variables
+#### Properties
+##### Test.description
+This is a string that describes test.
+
+##### Test.execution
+A promise that contains code of test.
+
+#### Static properties
 ##### Test.executions
-Where test promises, which are named executions, are stored in Test class.
+Where test promises, which are named executions, are stored in `Test` class.
 
 #### Functions
 ##### Test.constructor(description = string, code = function)
@@ -81,7 +92,7 @@ Arguments:
 * **Code:** must be a function, whether async or not, which is immediately executed as code of test.
 
 ##### Test.assert(assertion = boolean)
-It throws an error if assertion is false.
+It throws a `TestAssertionError` if assertion is false.
 Arguments: 
 * **Assertion:** must be boolean. If all assertions are true, test is successsful, otherwise test fails.
 
@@ -89,7 +100,7 @@ Arguments:
 It logs `Success! Test: My test's description` to the console with green appearance.
 
 ##### Test.failureMessage(error = error)
-It logs given error this way: `FAILED! Test: "My test's description" due to "an error"`
+It logs a group with given error inside which has this title: `FAILED! Test: "My test's description" due to "ErrorName"`. 
 Arguments:
 * **Error:** must be an error which is logged to the console.
 
@@ -106,3 +117,14 @@ Firstly, it starts a group in the console to have all test logs with title "Test
 
 Arguments:
 * **Tests:** must be a function that immediately executed. This function is expected to contain the creation of the tests, e.g. `new Test("description", (assert) => { /* code */ })`.
+
+### TestAssertionError class
+This error is thrown when an assertion is false. It extends `Error`.
+
+#### Variables
+##### TestAssertionError.name
+Name is `"TestAssertionError"` (string).
+
+#### Functions
+##### TestAssertionError.constructor()
+Calls super with argument `"Test assertion is false"`.

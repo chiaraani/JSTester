@@ -1,7 +1,7 @@
 /// TESTER ///
 
 class Test {
-	static config = {logSuccessful: true, alertFailure: true};
+	static config = {logSuccessful: true, alertFailure: true, errorGroupCollapsed: true};
 	static executions = []; // Test execution promises.
 	
 	constructor(description, code) {
@@ -21,15 +21,24 @@ class Test {
 	  }
 	}
 
-	assert(assertion) {	if(!assertion) throw "Test assertion is false"; } // This function is passed to test code as an argument.
+	assert(assertion) {	if(!assertion) throw new TestAssertionError; } // This function is passed to test code as an argument.
 
 	successMessage() {
 	  if (Test.config.logSuccessful) {
-	  	console.info(`%c Success! Test: ${this.description}`, 'color: green; background: #dfd;');
+	  	console.info(`%c Success! Test: ${this.description} `, 'color: green; background: #dfd;');
 	  } 
 	}
 
-	failureMessage(error) { console.error(`FAILED! Test: "${this.description}" due to "${error}"`) }
+	failureMessage(error) {
+		const message = `%c FAILED! Test: "${this.description}" due to "${error.name}"`;
+		const style = 'color: red; background: #fdd; font-weight: bold;';
+
+		if (Test.config.errorGroupCollapsed)	console.groupCollapsed(message, style);
+	  else console.group(message, style);
+
+		console.error(error);
+		console.groupEnd();
+	}
 
 	static summary(results) { // It logs a summary of results
 		const testCount = results.length; // Result count is the same as test count.
@@ -54,4 +63,9 @@ class Test {
 		tests();
 		Promise.allSettled(this.executions).then(this.summary);
 	}
+}
+
+class TestAssertionError extends Error  {
+	name = "TestAssertionError";
+	constructor() {	super("Test assertion is false");	}
 }
