@@ -1,6 +1,6 @@
 # JavaScript Tester README
 ## Description
-This is a tiny test framework for JS. What is special about it? Its low weight! It is barely 57 lines of code, and weighs 2KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
+This is a tiny test framework for JS. What is special about it? Its low weight! It weighs barely 4KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
 
 ## Usage
 ### Case
@@ -17,13 +17,13 @@ Test.case(() => {
 Then, write each separate test.
 
 ```JS
-Test.case((test) => {
-	new Test("My variable equals 10", (assert) => {
+Test.case((t) => {
+	new Test("My variable equals 10", assert => {
 		let variable = 10;
-		assert(variable == 10);
+		assert(variable, "==", 10);
 	});
 
-  new Test("description", (assert) => { /* Another test */ })
+  new Test("description", assert => { /* Another test */ })
 });
 
 ```
@@ -40,14 +40,34 @@ Great!
 A test can fail for two reasons:
 1. At least one assertion is not true.
   ```
-  > FAILED! Test: "My test name" due to "Test assertion is false"
+  > FAILED! Test: "My test name" due to "TestAssertionError"
   
   ```
 2. An error is thrown.
   ```
-  > FAILED! Test: "My test name" due to "ReferenceError: something is not defined"
+  > FAILED! Test: "My test name" due to "ReferenceError"
   
   ```
+Error details are inside a console group.
+
+### Assert
+```JS
+assert(true);
+assert(false, "!");
+
+assert(1, "==", 1);
+assert(1, "!=", 2);
+
+let object1 = {};
+assert(object1, "===", object1);
+assert({}, "!==", {});
+
+assert("Everything", "includes", "thing");
+assert("Everything", "excludes", "nothing");
+
+assert("Goodbye", "startsWith", "Good");
+assert("Goodbye", "endsWith", "bye");
+```
 
 ### Configuration
 All configuration variables are in `Test.config` object. Set them before creating tests.
@@ -117,6 +137,12 @@ Firstly, it starts a group in the console to have all test logs with title "Test
 
 Arguments:
 * **Tests:** must be a function that immediately executed. This function is expected to contain the creation of the tests, e.g. `new Test("description", (assert) => { /* code */ })`.
+
+### TestAssert class
+This class is the same as `assert function` given to `Test objects`.
+
+#### TestAssertionError.constructor()
+Calls right assert kind and throws `TestAssertionError` if assertion is false.
 
 ### TestAssertionError class
 This error is thrown when an assertion is false. It extends `Error`.

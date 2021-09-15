@@ -3,7 +3,7 @@
 class Test {
 	static config = {logSuccessful: true, alertFailure: true, errorGroupCollapsed: true};
 	static executions = []; // Test execution promises.
-	
+
 	constructor(description, code) {
 		this.description = description;
 		this.execution = this.execute(code);
@@ -13,6 +13,8 @@ class Test {
 		Test.executions.push(this.execution); // It adds its execution (promise) to an array of Test Class of all executions.
 	}
 
+	assert(...args) { new TestAssert(...args) } // This function is passed to test code as an argument.
+
 	execute(code) { // It executes code asyncronously.
 		if (code.constructor.name == "AsyncFunction") {
 		  return code(this.assert);
@@ -20,8 +22,6 @@ class Test {
 	    return (async () => code(this.assert))();
 	  }
 	}
-
-	assert(assertion) {	if(!assertion) throw new TestAssertionError; } // This function is passed to test code as an argument.
 
 	successMessage() {
 	  if (Test.config.logSuccessful) {
@@ -36,6 +36,7 @@ class Test {
 		if (Test.config.errorGroupCollapsed)	console.groupCollapsed(message, style);
 	  else console.group(message, style);
 
+	  if(error.name == "TestAssertionError") console.log(...error.logMessage);
 		console.error(error);
 		console.groupEnd();
 	}
@@ -58,14 +59,47 @@ class Test {
 		}
 	}
 
-	static case(tests) { // It creates given tests and logs a summary about their results.
+	static case(createTests) { // It creates given tests and logs a summary about their results.
 		console.group("Tester");
-		tests();
+		createTests();
 		Promise.allSettled(this.executions).then(this.summary);
 	}
 }
 
-class TestAssertionError extends Error  {
-	name = "TestAssertionError";
-	constructor() {	super("Test assertion is false");	}
+class TestAssert { // Assert function
+	constructor(arg0, kind = "truthy", ...args) { // Arg abbreviation for argument.
+		args.unshift(arg0); // Args put together.
+
+		const assertion = this[kind](...args); // Calls assert kind with arguments.
+		if(assertion.constructor == Array) throw new TestAssertionError(assertion); // Throws an error when an array is returned for arrays are error messages.
+	}
+
+	// Basic assert kinds //
+	truthy(arg) { return Boolean(arg) || [arg, "is NOT truthy"] }
+	["!"](arg) { return !arg || [arg, "is NOT falsy"] }
+
+	// Equality assert kinds //
+	["=="](arg0, arg1) { return arg0 == arg1 || [arg0, "does NOT equal", arg1] }
+	["!="](arg0, arg1) { return arg0 != arg1 || [arg0, "DOES equal", arg1] }
+	["==="](arg0, arg1) { return arg0 === arg1 || [arg0, "is NOT equal to", arg1] }
+	["!=="](arg0, arg1) { return arg0 !== arg1 || [arg0, "DOES be equal to", arg1] }
+
+	// Array or String assert kinds //
+	["includes"](arg0, arg1) { return arg0.includes(arg1) || [arg0, "does NOT include", arg1] }
+	["excludes"](arg0, arg1) { return !arg0.includes(arg1) || [arg0, "does NOT exclude", arg1] }
+
+	// String assert kinds //
+	["startsWith"](arg0, arg1) { return arg0.startsWith(arg1) || [arg0, "does NOT start with", arg1] }
+	["endsWith"](arg0, arg1) { return arg0.endsWith(arg1) || [arg0, "does NOT end with", arg1] }
+}
+
+class TestAssertionError extends Error  {	
+	name = "TestAssertionError"
+
+	constructor(messageArray) {
+		const message = messageArray.map(item => JSON.stringify(item)).join(" "); // Format message
+
+		super(message);
+		this.logMessage = messageArray; // Pass these arguments to console.log()
+	}
 }
