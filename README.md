@@ -17,7 +17,7 @@ Test.case(() => {
 Then, write each separate test.
 
 ```JS
-Test.case((t) => {
+Test.case(() => {
 	new Test("My variable equals 10", assert => {
 		let variable = 10;
 		assert(variable, "==", 10);
