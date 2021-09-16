@@ -1,19 +1,29 @@
 /// TESTER ///
 
 class Test {
-	static config = {logSuccessful: true, alertFailure: true, errorGroupCollapsed: true};
+	static config = {
+		logSuccessful: true, 
+		alertFailure: true, 
+		errorGroupCollapsed: true
+	};
+
 	static executions = []; // Test execution promises.
 
 	constructor(description, code) {
 		this.description = description;
 		this.execution = this.execute(code);
 
-		this.execution.then(() => this.successMessage(), error => this.failureMessage(error)); // Logging test's result.
+		// Logging test's result:
+		this.execution
+		  .then( () => this.successMessage() )
+			.catch( error => this.failureMessage(error) ); 
 
-		Test.executions.push(this.execution); // It adds its execution (promise) to an array of Test Class of all executions.
+		// It adds its execution (promise) to an array of Test Class of all executions.
+		Test.executions.push(this.execution); 
 	}
 
-	assert(...args) { new TestAssert(...args) } // This function is passed to test code as an argument.
+	// This function is passed to test code as an argument.
+	assert(...args) { new TestAssert(...args) }
 
 	execute(code) { // It executes code asyncronously.
 		if (code.constructor.name == "AsyncFunction") {
@@ -25,7 +35,9 @@ class Test {
 
 	successMessage() {
 	  if (Test.config.logSuccessful) {
-	  	console.info(`%c Success! Test: ${this.description} `, 'color: green; background: #dfd;');
+	  	const message = `%c Success! Test: ${this.description} `;
+	  	const style = 'color: green; background: #dfd;';
+	  	console.info(message, style);
 	  } 
 	}
 
@@ -33,21 +45,25 @@ class Test {
 		const message = `%c FAILED! Test: "${this.description}" due to "${error.name}"`;
 		const style = 'color: red; background: #fdd; font-weight: bold;';
 
-		if (Test.config.errorGroupCollapsed)	console.groupCollapsed(message, style);
+		if (Test.config.errorGroupCollapsed) console.groupCollapsed(message, style);
 	  else console.group(message, style);
 
-	  if(error.name == "TestAssertionError") console.log(...error.logMessage);
+	  if (error.name == "TestAssertionError") console.log(...error.logMessage);
 		console.error(error);
 		console.groupEnd();
 	}
 
 	static summary(results) { // It logs a summary of results
 		const testCount = results.length; // Result count is the same as test count.
-		const passed = results.filter(result => result.status == "fulfilled").length; // Number of successful tests.
+
+		// Number of successful tests:
+		const passed = results.filter( result => result.status == "fulfilled" ).length;
+
 		const failed = testCount - passed;
 		const allPassed = !failed;
 
-		const color = allPassed ? 'green' : (passed ? 'blue' : 'red'); // Background color depends on the number of passed tests.
+		// Background color depends on the number of passed tests.
+		const color = allPassed ? 'green' : (passed ? 'blue' : 'red');
 		const style = `color: white; background: ${color}; display: block;`;
 
 		const message = `%c ${passed} PASSED & ${failed} FAILED (tests summary)`;
@@ -59,7 +75,8 @@ class Test {
 		}
 	}
 
-	static case(createTests) { // It creates given tests and logs a summary about their results.
+	// It creates given tests and logs a summary about their results.
+	static case(createTests) { 
 		console.group("Tester");
 		createTests();
 		Promise.allSettled(this.executions).then(this.summary);
@@ -71,7 +88,8 @@ class TestAssert { // Assert function
 		args.unshift(arg0); // Args put together.
 
 		const assertion = this[kind](...args); // Calls assert kind with arguments.
-		if(assertion.constructor == Array) throw new TestAssertionError(assertion); // Throws an error when an array is returned for arrays are error messages.
+		// Throws an error when an array is returned for arrays are error messages.
+		if(assertion.constructor == Array) throw new TestAssertionError(assertion);
 	}
 
 	// Basic assert kinds //
@@ -85,19 +103,28 @@ class TestAssert { // Assert function
 	["!=="](arg0, arg1) { return arg0 !== arg1 || [arg0, "DOES be equal to", arg1] }
 
 	// Array or String assert kinds //
-	["includes"](arg0, arg1) { return arg0.includes(arg1) || [arg0, "does NOT include", arg1] }
-	["excludes"](arg0, arg1) { return !arg0.includes(arg1) || [arg0, "does NOT exclude", arg1] }
+	["includes"](arg0, arg1) { 
+		return arg0.includes(arg1) || [arg0, "does NOT include", arg1]; 
+	}
+	["excludes"](arg0, arg1) { 
+		return !arg0.includes(arg1) || [arg0, "does NOT exclude", arg1];
+	}
 
 	// String assert kinds //
-	["startsWith"](arg0, arg1) { return arg0.startsWith(arg1) || [arg0, "does NOT start with", arg1] }
-	["endsWith"](arg0, arg1) { return arg0.endsWith(arg1) || [arg0, "does NOT end with", arg1] }
+	["startsWith"](arg0, arg1) { 
+		return arg0.startsWith(arg1) || [arg0, "does NOT start with", arg1];
+	}
+	["endsWith"](arg0, arg1) {
+		return arg0.endsWith(arg1) || [arg0, "does NOT end with", arg1];
+	}
 }
 
 class TestAssertionError extends Error  {	
 	name = "TestAssertionError"
 
 	constructor(messageArray) {
-		const message = messageArray.map(item => JSON.stringify(item)).join(" "); // Format message
+		const message = messageArray
+		  .map(item => JSON.stringify(item)).join(" "); // Format message
 
 		super(message);
 		this.logMessage = messageArray; // Pass these arguments to console.log()
