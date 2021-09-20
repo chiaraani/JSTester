@@ -1,3 +1,4 @@
+![JSTester example-2021-09-20_14 56 45](https://user-images.githubusercontent.com/13300465/134015478-626038aa-c12b-4e39-96bb-8c8ec9cec4e1.gif)
 # JavaScript Tester README
 ## Description
 This is a tiny test framework for JS. What is special about it? Its low weight! It weighs barely 4KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
