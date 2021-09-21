@@ -56,12 +56,11 @@ Error details are inside a console group.
 assert(true);
 assert(false, "!");
 
-assert(1, "==", 1);
+assert("1", "==",1);
 assert(1, "!=", 2);
 
-let object1 = {};
-assert(object1, "===", object1);
-assert({}, "!==", {});
+assert(1, "===", 1);
+assert("1", "!==", 1);
 
 assert("Everything", "includes", "thing");
 assert("Everything", "excludes", "nothing");
