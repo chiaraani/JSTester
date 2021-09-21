@@ -48,7 +48,7 @@ class Test {
 		if (Test.config.errorGroupCollapsed) console.groupCollapsed(message, style);
 	  else console.group(message, style);
 
-	  if (error.name == "TestAssertionError") console.log(...error.logMessage);
+	  if (error.name == "TestAssertionError") console.log(...error.messageArray);
 		console.error(error);
 		console.groupEnd();
 	}
@@ -84,7 +84,8 @@ class Test {
 }
 
 class TestAssert {
-	constructor(arg0, assertKind = "truthy", ...args) { // Arg abbreviation for argument.
+	// Arg abbreviation for argument.
+	constructor(arg0, assertKind = "truthy", ...args) {
 		args.unshift(arg0);
 
 		this[assertKind](...args);
@@ -123,10 +124,12 @@ class TestAssertionError extends Error  {
 	name = "TestAssertionError"
 
 	constructor(messageArray) {
-		const message = messageArray
-		  .map(item => JSON.stringify(item)).join(" "); // Format message
+		function formatMessage() {
+			const stringifiedItems = messageArray.map(item => JSON.stringify(item));
+			return stringifiedItems.join(" ");
+		}
 
-		super(message);
-		this.logMessage = messageArray; // Pass these arguments to console.log()
+		super( formatMessage() );
+		this.messageArray = messageArray;
 	}
 }
