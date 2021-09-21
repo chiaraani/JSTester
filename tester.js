@@ -7,31 +7,28 @@ class Test {
 		errorGroupCollapsed: true
 	};
 
-	static executions = []; // Test execution promises.
+	static executions = [];
 
 	constructor(description, code) {
 		this.description = description;
-		this.execution = this.execute(code);
+		this.execution = this.getExecution(code);
 
-		// Logging test's result:
 		this.execution
 		  .then( () => this.successMessage() )
 			.catch( error => this.failureMessage(error) ); 
 
-		// It adds its execution (promise) to an array of Test Class of all executions.
 		Test.executions.push(this.execution); 
 	}
 
-	// This function is passed to test code as an argument.
-	assert(...args) { new TestAssert(...args) }
-
-	execute(code) { // It executes code asyncronously.
+	getExecution(code) {
 		if (code.constructor.name == "AsyncFunction") {
 		  return code(this.assert);
 	  } else {
 	    return (async () => code(this.assert))();
 	  }
 	}
+
+	assert(...args) { new TestAssert(...args) }
 
 	successMessage() {
 	  if (Test.config.logSuccessful) {
@@ -53,29 +50,30 @@ class Test {
 		console.groupEnd();
 	}
 
-	static summary(results) { // It logs a summary of results
-		const testCount = results.length; // Result count is the same as test count.
+	static summary(results) {
+		const testCount = results.length;
 
-		// Number of successful tests:
-		const passed = results.filter( result => result.status == "fulfilled" ).length;
+		const passedCount = 
+			results
+			.filter( result => result.status == "fulfilled" )
+			.length;
 
-		const failed = testCount - passed;
-		const allPassed = !failed;
+		const failedCount = testCount - passedCount;
+		const allPassed = failedCount == 0;
 
-		// Background color depends on the number of passed tests.
-		const color = allPassed ? 'green' : (passed ? 'blue' : 'red');
-		const style = `color: white; background: ${color}; display: block;`;
+		const background = allPassed ? 'green' : (passedCount > 0 ? 'blue' : 'red');
+		const style = `color: white; background: ${background}; display: block;`;
 
-		const message = `%c ${passed} PASSED & ${failed} FAILED (tests summary)`;
+		const message = `%c ${passedCount} PASSED & ${failedCount} FAILED (tests summary)`;
+
 		console.info(message, style);
 		console.groupEnd();
 
-		if (failed && Test.config.alertFailure) {
+		if (failedCount && Test.config.alertFailure) {
 			alert("FAILED! Some tests have failed. Check console for more info.");
 		}
 	}
 
-	// It creates given tests and logs a summary about their results.
 	static case(createTests) { 
 		console.group("Tester");
 		createTests();
