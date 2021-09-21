@@ -83,39 +83,39 @@ class Test {
 	}
 }
 
-class TestAssert { // Assert function
-	constructor(arg0, kind = "truthy", ...args) { // Arg abbreviation for argument.
-		args.unshift(arg0); // Args put together.
+class TestAssert {
+	constructor(arg0, assertKind = "truthy", ...args) { // Arg abbreviation for argument.
+		args.unshift(arg0);
 
-		const assertion = this[kind](...args); // Calls assert kind with arguments.
-		// Throws an error when an array is returned for arrays are error messages.
-		if(assertion.constructor == Array) throw new TestAssertionError(assertion);
+		this[assertKind](...args);
 	}
 
+	error(...message) { throw new TestAssertionError(message) }
+
 	// Basic assert kinds //
-	truthy(arg) { return Boolean(arg) || [arg, "is NOT truthy"] }
-	["!"](arg) { return !arg || [arg, "is NOT falsy"] }
+	truthy(arg) { Boolean(arg) || this.error(arg, "is NOT truthy") }
+	["!"](arg) { !arg || this.error(arg, "is NOT falsy") }
 
 	// Equality assert kinds //
-	["=="](arg0, arg1) { return arg0 == arg1 || [arg0, "does NOT equal", arg1] }
-	["!="](arg0, arg1) { return arg0 != arg1 || [arg0, "DOES equal", arg1] }
-	["==="](arg0, arg1) { return arg0 === arg1 || [arg0, "is NOT equal to", arg1] }
-	["!=="](arg0, arg1) { return arg0 !== arg1 || [arg0, "DOES be equal to", arg1] }
+	["=="](arg0, arg1) { arg0 == arg1 || this.error(arg0, "does NOT equal", arg1) }
+	["!="](arg0, arg1) { arg0 != arg1 || this.error(arg0, "DOES equal", arg1) }
+	["==="](arg0, arg1) { arg0 === arg1 || this.error(arg0, "is NOT equal to", arg1) }
+	["!=="](arg0, arg1) { arg0 !== arg1 || this.error(arg0, "DOES be equal to", arg1) }
 
 	// Array or String assert kinds //
 	["includes"](arg0, arg1) { 
-		return arg0.includes(arg1) || [arg0, "does NOT include", arg1]; 
+		arg0.includes(arg1) || this.error(arg0, "does NOT include", arg1);
 	}
 	["excludes"](arg0, arg1) { 
-		return !arg0.includes(arg1) || [arg0, "does NOT exclude", arg1];
+		!arg0.includes(arg1) || this.error(arg0, "does NOT exclude", arg1);
 	}
 
 	// String assert kinds //
 	["startsWith"](arg0, arg1) { 
-		return arg0.startsWith(arg1) || [arg0, "does NOT start with", arg1];
+		arg0.startsWith(arg1) || this.error(arg0, "does NOT start with", arg1);
 	}
 	["endsWith"](arg0, arg1) {
-		return arg0.endsWith(arg1) || [arg0, "does NOT end with", arg1];
+		arg0.endsWith(arg1) || this.error(arg0, "does NOT end with", arg1);
 	}
 }
 
