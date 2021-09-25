@@ -1,7 +1,7 @@
 ![JSTester example-2021-09-20_14 56 45](https://user-images.githubusercontent.com/13300465/134015478-626038aa-c12b-4e39-96bb-8c8ec9cec4e1.gif)
 # JavaScript Tester README
 ## Description
-This is a tiny test framework for JS. What is special about it? Its low weight! It weighs barely 4KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
+This is a tiny test framework for JS. What is special about it? Its low weight! It weighs barely 3.7KiB. Well, I actually took it as an exercise. I made it because I didn't want to waste time installing node for extremely simple JS exercises, tiring! So the name "framework" is too big for it. ;D
 
 ## Usage
 ### Case
@@ -10,7 +10,7 @@ First of all we must create the test case:
 ```JS
 Test.case(() => {
 	// Tests here
-});
+})
 
 ```
 
@@ -19,13 +19,13 @@ Then, write each separate test.
 
 ```JS
 Test.case(() => {
-	new Test("My variable equals 10", assert => {
-		let variable = 10;
-		assert(variable, "==", 10);
-	});
+	new Test('My variable equals 10', assert => {
+		let variable = 10
+		assert(variable, '==', 10)
+	})
 
-  new Test("description", assert => { /* Another test */ })
-});
+  new Test('description', assert => { /* Another test */ })
+})
 
 ```
 Console
@@ -51,23 +51,30 @@ A test can fail for two reasons:
   ```
 Error details are inside a console group.
 
-### Assert
+### testAssert(firstArgument, kind, ...otherArguments)
+`testAssert function` (global name) is passed to each test code as an argument which I recommend to call `assert`.
+
 ```JS
-assert(true);
-assert(false, "!");
+new Test('My variable equals 10', assert => {
+  assert(true) /* Or */ testAssert(true)
+  assert(false, '!')
 
-assert("1", "==",1);
-assert(1, "!=", 2);
+  assert('1', '==',1)
+  assert(1, '!=', 2)
 
-assert(1, "===", 1);
-assert("1", "!==", 1);
+  assert(1, '===', 1)
+  assert('1', '!==', 1)
 
-assert("Everything", "includes", "thing");
-assert("Everything", "excludes", "nothing");
+  assert('Everything', 'includes', 'thing')
+  assert('Everything', 'excludes', 'nothing')
 
-assert("Goodbye", "startsWith", "Good");
-assert("Goodbye", "endsWith", "bye");
+  assert('Goodbye', 'startsWith', 'Good')
+  assert('Goodbye', 'endsWith', 'bye')
+})
+
+testAssert(false) // Uncaught!
 ```
+If the function is out of test and is not true, it will throw an uncaught error out of test console group obviously.
 
 ### Configuration
 All configuration variables are in `Test.config` object. Set them before creating tests.
@@ -136,10 +143,7 @@ Arguments:
 Firstly, it starts a group in the console to have all test logs with title "Tester". Secondly, it executes given function tests. Finally, it logs a summary of test executions and ends console group.
 
 Arguments:
-* **Tests:** must be a function that immediately executed. This function is expected to contain the creation of the tests, e.g. `new Test("description", (assert) => { /* code */ })`.
-
-### TestAssert class
-This class is the same as `assert function` given to `Test objects`.
+* **Tests:** must be a function that immediately executed. This function is expected to contain the creation of the tests, e.g. `new Test('description', (assert) => { /* code */ })`.
 
 #### TestAssertionError.constructor()
 Calls right assert kind and throws `TestAssertionError` if assertion is false.
@@ -149,8 +153,4 @@ This error is thrown when an assertion is false. It extends `Error`.
 
 #### Variables
 ##### TestAssertionError.name
-Name is `"TestAssertionError"` (string).
-
-#### Functions
-##### TestAssertionError.constructor()
-Calls super with argument `"Test assertion is false"`.
+Name is `'TestAssertionError'` (string).

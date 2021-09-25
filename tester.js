@@ -22,13 +22,11 @@ class Test {
 
   getExecution (code) {
     if (code.constructor.name === 'AsyncFunction') {
-      return code(this.assert);
+      return code(testAssert);
     } else {
-      return (async () => code(this.assert))();
+      return (async () => code(testAssert))();
     }
   }
-
-  assert (...args) { new TestAssert(...args) }
 
   successMessage () {
     if (Test.config.logSuccessful) {
@@ -81,53 +79,50 @@ class Test {
   }
 }
 
-class TestAssert {
+function testAssert(arg0, kind = "truthy", ...args) {
   // Arg abbreviation for argument.
-  constructor (arg0, assertKind = 'truthy', ...args) {
-    args.unshift(arg0);
+  args.unshift(arg0);
 
-    this[assertKind](...args);
-  }
+  const asserter =  {
+    // Basic assert kinds //
+    truthy () { Boolean(args[0]) || fail(args[0], 'is NOT truthy') },
+    ['!'] () { !args[0] || fail(args[0], 'is NOT falsy') },
 
-  error (...message) { throw new TestAssertionError(message) }
+    // Equality assert kinds //
+    ['=='] () { args[0] == args[1]|| fail(args[0], 'does NOT equal', args[1]) },
+    ['!='] () { args[0] != args[1] || fail(args[0], 'DOES equal', args[1]) },
+    ['==='] () { args[0] === args[1] || fail(args[0], 'is NOT equal to', args[1]) },
+    ['!=='] () { args[0] !== args[1] || fail(args[0], 'DOES be equal to', args[1]) },
 
-  // Basic assert kinds //
-  truthy (arg) { Boolean(arg) || this.error(arg, 'is NOT truthy') }
-  ['!'] (arg) { !arg || this.error(arg, 'is NOT falsy') }
+    // Array or String assert kinds //
+    includes () { 
+      args[0].includes(args[1]) || fail(args[0], 'does NOT include', args[1])
+    },
+    excludes () { 
+      !args[0].includes(args[1]) || fail(args[0], 'does NOT exclude', args[1])
+    },
 
-  // Equality assert kinds //
-  ['=='] (arg0, arg1) { arg0 == arg1 || this.error(arg0, 'does NOT equal', arg1) }
-  ['!='] (arg0, arg1) { arg0 != arg1 || this.error(arg0, 'DOES equal', arg1) }
-  ['==='] (arg0, arg1) { arg0 === arg1 || this.error(arg0, 'is NOT equal to', arg1) }
-  ['!=='] (arg0, arg1) { arg0 !== arg1 || this.error(arg0, 'DOES be equal to', arg1) }
-
-  // Array or String assert kinds //
-  includes (arg0, arg1) { 
-    arg0.includes(arg1) || this.error(arg0, 'does NOT include', arg1);
-  }
-  excludes (arg0, arg1) { 
-    !arg0.includes(arg1) || this.error(arg0, 'does NOT exclude', arg1);
-  }
-
-  // String assert kinds //
-  startsWith (arg0, arg1) { 
-    arg0.startsWith(arg1) || this.error(arg0, 'does NOT start with', arg1);
-  }
-  endsWith (arg0, arg1) {
-    arg0.endsWith(arg1) || this.error(arg0, 'does NOT end with', arg1);
-  }
-}
-
-class TestAssertionError extends Error  {  
-  name = 'TestAssertionError'
-
-  constructor (messageArray) {
-    function formatMessage () {
-      const stringifiedItems = messageArray.map(item => JSON.stringify(item));
-      return stringifiedItems.join(' ');
+    // String assert kinds //
+    startsWith () { 
+      args[0].startsWith(args[1]) || fail(args[0], 'does NOT start with', args[1])
+    },
+    endsWith () {
+      args[0].endsWith(args[1]) || fail(args[0], 'does NOT end with', args[1])
     }
+  }
 
-    super( formatMessage() );
-    this.messageArray = messageArray;
+  asserter[kind]()
+  
+  function fail(...messageArray) {
+    let error =  new TestAssertionError( messageArrayToString(messageArray) );
+    error.messageArray = messageArray;
+    throw error;
+  }
+
+  function messageArrayToString(messageArray) {
+    const stringifiedItems = messageArray.map(item => JSON.stringify(item));
+    return stringifiedItems.join(' ');
   }
 }
+
+class TestAssertionError extends Error  { name = 'TestAssertionError' }
