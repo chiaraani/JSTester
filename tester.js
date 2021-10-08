@@ -1,87 +1,88 @@
+'use strict';
 /// TESTER ///
 
 class Test {
   static config = {
-    logSuccessful: true, 
-    alertFailure: true, 
+    logSuccessful: true,
+    alertFailure: true,
     errorGroupCollapsed: true
-  };
+  }
 
-  static executions = [];
+  static executions = []
 
   constructor (description, code) {
-    this.description = description;
-    this.execution = this.getExecution(code);
+    this.description = description
+    this.execution = this.getExecution(code)
 
     this.execution
       .then( () => this.successMessage() )
-      .catch( error => this.failureMessage(error) ); 
+      .catch( error => this.failureMessage(error) )
 
-    Test.executions.push(this.execution); 
+    Test.executions.push(this.execution)
   }
 
   getExecution (code) {
     if (code.constructor.name === 'AsyncFunction') {
-      return code(testAssert);
+      return code(testAssert)
     } else {
-      return (async () => code(testAssert))();
+      return (async () => code(testAssert))()
     }
   }
 
   successMessage () {
     if (Test.config.logSuccessful) {
-      const message = `%c Success! Test: ${this.description} `;
-      const style = 'color: green; background: #dfd;';
-      console.info(message, style);
+      const message = `%c Success! Test: ${this.description} `
+      const style = 'color: green; background: #dfd;'
+      console.info(message, style)
     } 
   }
 
   failureMessage (error) {
-    const message = `%c FAILED! Test: "${this.description}" due to "${error.name}"`;
-    const style = 'color: red; background: #fdd; font-weight: bold;';
+    const message = `%c FAILED! Test: "${this.description}" due to "${error.name}"`
+    const style = 'color: red; background: #fdd; font-weight: bold;'
 
-    if (Test.config.errorGroupCollapsed) console.groupCollapsed(message, style);
-    else console.group(message, style);
+    if (Test.config.errorGroupCollapsed) console.groupCollapsed(message, style)
+    else console.group(message, style)
 
-    if (error.name === 'TestAssertionError') console.log(...error.messageArray);
-    console.error(error);
-    console.groupEnd();
+    if (error.name === 'TestAssertionError') console.log(...error.messageArray)
+    console.error(error)
+    console.groupEnd()
   }
 
   static summary (results) {
-    const testCount = results.length;
+    const testCount = results.length
 
-    const passedCount = 
+    const passedCount =
       results
       .filter( result => result.status === 'fulfilled' )
-      .length;
+      .length
 
-    const failedCount = testCount - passedCount;
-    const allPassed = failedCount === 0;
+    const failedCount = testCount - passedCount
+    const allPassed = failedCount === 0
 
-    const background = allPassed ? 'green' : (passedCount > 0 ? 'blue' : 'red');
-    const style = `color: white; background: ${background}; display: block;`;
+    const background = allPassed ? 'green' : (passedCount > 0 ? 'blue' : 'red')
+    const style = `color: white; background: ${background}; display: block;`
 
-    const message = `%c ${passedCount} PASSED & ${failedCount} FAILED (tests summary)`;
+    const message = `%c ${passedCount} PASSED & ${failedCount} FAILED (tests summary)`
 
-    console.info(message, style);
-    console.groupEnd();
+    console.info(message, style)
+    console.groupEnd()
 
     if (failedCount && Test.config.alertFailure) {
-      alert('FAILED! Some tests have failed. Check console for more info.');
+      alert('FAILED! Some tests have failed. Check console for more info.')
     }
   }
 
-  static case (createTests) { 
-    console.group('Tester');
-    createTests();
-    Promise.allSettled(this.executions).then(this.summary);
+  static case (createTests) {
+    console.group('Tester')
+    createTests()
+    Promise.allSettled(this.executions).then(this.summary)
   }
 }
 
 function testAssert(arg0, kind = "truthy", ...args) {
   // Arg abbreviation for argument.
-  args.unshift(arg0);
+  args.unshift(arg0)
 
   const asserter =  {
     // Basic assert kinds //
@@ -114,15 +115,16 @@ function testAssert(arg0, kind = "truthy", ...args) {
   asserter[kind]()
   
   function fail(...messageArray) {
-    let error =  new TestAssertionError( messageArrayToString(messageArray) );
-    error.messageArray = messageArray;
-    throw error;
+    let error =  new TestAssertionError( messageArrayToString(messageArray) )
+    error.messageArray = messageArray
+    throw error
   }
 
   function messageArrayToString(messageArray) {
-    const stringifiedItems = messageArray.map(item => JSON.stringify(item));
-    return stringifiedItems.join(' ');
+    const stringifiedItems = messageArray.map(item => JSON.stringify(item))
+    return stringifiedItems.join(' ')
   }
 }
 
 class TestAssertionError extends Error  { name = 'TestAssertionError' }
+
