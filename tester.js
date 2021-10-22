@@ -49,34 +49,32 @@ class Test {
 		console.groupEnd()
 	}
 
-	static summary (results) {
-		const testCount = results.length
+	static case(createTests) {
+		console.group('Tester')
+		createTests()
+		Promise.allSettled(this.executions).then(this.summary)
+	}
 
-		const passedCount =
-			results
-			.filter( result => result.status === 'fulfilled' )
-			.length
+	static summary (tests) {
+		const passedTests =	tests.filter( test => test.status === 'fulfilled' )
+		const allTestsPassed = passedTests.length === tests.length
+		const failedTestsLength = tests.length - passedTests.length
 
-		const failedCount = testCount - passedCount
-		const allPassed = failedCount === 0
+		let background;
+		if (allTestsPassed) background = 'green'
+ 		else if	(passedTests.length > 0) background = 'blue'
+		else background = 'red'
 
-		const background = allPassed ? 'green' : (passedCount > 0 ? 'blue' : 'red')
 		const style = `color: white; background: ${background}; display: block;`
-
-		const message = `%c ${passedCount} PASSED & ${failedCount} FAILED (tests summary)`
+		const message = 
+			`%c ${passedTests.length} PASSED & ${failedTestsLength} FAILED (tests summary)`
 
 		console.info(message, style)
 		console.groupEnd()
 
-		if (failedCount && Test.config.alertFailure) {
+		if (!allTestsPassed && Test.config.alertFailure) {
 			alert('FAILED! Some tests have failed. Check console for more info.')
 		}
-	}
-
-	static case (createTests) {
-		console.group('Tester')
-		createTests()
-		Promise.allSettled(this.executions).then(this.summary)
 	}
 }
 
